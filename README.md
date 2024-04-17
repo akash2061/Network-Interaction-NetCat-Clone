@@ -1,1 +1,1 @@
-# Network Interaction - NetCat Clone in Rust. 🦀
+# RustSocket: A Netcat-Inspired Networking Utility. 🦀
