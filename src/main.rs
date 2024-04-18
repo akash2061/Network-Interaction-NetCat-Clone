@@ -1,56 +1,24 @@
-use clap::{App, Arg};
 use std::io::Read;
 use std::io::{self, BufRead, BufReader, Write};
 use std::net::{TcpListener, TcpStream};
 use std::thread;
 
 fn main() -> io::Result<()> {
-    let app = App::new("Network Interaction Netcat Clone")
-        .version("0.1.0")
-        .author("akash2061")
-        .about("Performs network operations similar to Netcat")
-        .arg(
-            Arg::new("iphost")
-                .short('i')
-                .long("host")
-                .takes_value(true)
-                .required(true)
-                .help("The host address to connect to or listen on"),
-        )
-        .arg(
-            Arg::new("port")
-                .short('p')
-                .long("port")
-                .takes_value(true)
-                .required(true)
-                .help("The port number to connect to or listen on"),
-        )
-        .arg(
-            Arg::new("mode")
-                .short('m')
-                .long("mode")
-                .takes_value(true)
-                .required(true)
-                .help("Mode of operation: -c (connect) or -l (listen)"),
-        );
+    let args: Vec<String> = std::env::args().collect();
+    if args.len() < 4 {
+        eprintln!("Usage: {} <host> <port> <mode>", args[0]);
+        eprintln!("Modes: -c (connect), -l (listen)");
+        return Ok(());
+    }
 
-    let matches = app.get_matches();
+    let host = &args[1];
+    let port = &args[2].parse::<u16>().expect("Invalid port number");
+    let mode = &args[3];
 
-    let host = matches
-        .value_of("host")
-        .expect("Host is a required argument");
-    let port_str = matches
-        .value_of("port")
-        .expect("Port is a required argument");
-    let port = port_str.parse::<u16>().expect("Invalid port number");
-    let mode = matches
-        .value_of("mode")
-        .expect("Mode is a required argument");
-
-    match mode {
-        "-c" => client(host, port)?,
-        "-l" => server(port)?,
-        _ => eprintln!("Invalid mode: {}", mode), // Clap should handle this, but just in case
+    match mode.as_str() {
+        "-c" => client(&host, *port)?,
+        "-l" => server(*port)?,
+        _ => eprintln!("Invalid mode: {}", mode),
     }
 
     Ok(())
